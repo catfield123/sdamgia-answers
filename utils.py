@@ -1,9 +1,8 @@
-import js2py
+from ctypes import c_int32
 
-script = '''
-hashCode = function(s){
-  return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
-}
-'''
+def getHash(s):
+    hash_code = 0
+    for char in s:
+        hash_code = 31*hash_code + ord(char)
 
-getHash = js2py.eval_js(script)
+    return c_int32(hash_code).value   
