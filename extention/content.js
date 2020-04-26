@@ -1,4 +1,5 @@
 console.log('CONTENT GO!!!!')
+
 hashCode = function(s){
   return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
 }
@@ -16,12 +17,14 @@ function readTextFile(file,callback) {
     }
     rawFile.send(null);
 }
+
 show_wrapper = function(){
   readTextFile(url, function(text){
       var hash = JSON.parse(text);
       show_answers(hash);
   });
 }
+
 chrome.runtime.onMessage.addListener(gotMessage);
 
 function gotMessage(message, sender, sendResponse) {
@@ -31,26 +34,36 @@ function gotMessage(message, sender, sendResponse) {
 }
 
 function show_answers(hash_id_dict) {
+  alert('keksik');
   probview = document.getElementsByClassName('prob_view');
 
 
 
   for (i = 0; i < probview.length; i++) {
+    console.log(i);
     //task_id = probview[i].getElementsByTagName('a')[0].innerText;
 
-    data = probview[i].firstChild.firstChild.firstChild.nextElementSibling;
+    task = probview[i];
+    task_contents = task.firstChild.firstChild.firstChild.nextSibling.children;
 
-    data_inner = data.innerHTML;
-    data_inner = data_inner.split(RegExp(' width=".*?"')).join('');
-    data_inner = data_inner.split(RegExp(' height=".*?"')).join('');
-    data_inner = data_inner.split(RegExp(' style=".*?"')).join('');
-    data_inner = data_inner.split(RegExp(' class=".*?"')).join('');
-    data_inner = data_inner.split(RegExp(' align=".*?"')).join('');
-
-    hash = hashCode(data_inner);
+    text_for_hash = ''
+    for (k = 0; k < task_contents.length; k++){
+        task_content = task_contents[k]
+        images = task_content.getElementsByTagName('img');
+        task_img_srcs = '';
+        for (j = 0; j < images.length; j++) {
+            task_img_srcs = task_img_srcs + images[j].src;
+        }
+        task_text = task_content.textContent;
+        text_merged = task_img_srcs + task_text;
+        text_merged = text_merged.split(' ').join('').split('&nbsp;').join('');
+        text_for_hash = text_for_hash + text_merged;
+    }
+    text_for_hash = text_for_hash.split('').sort().join('');
+    code = hashCode(text_for_hash);
 
     task_title = probview[i].firstChild.firstChild.firstChild;
-    task_id = hash_id_dict[hash];
+    task_id = hash_id_dict[code];
     link_pattern = '<a style="color:red" href = "/problem?id=' + task_id + '">' + task_id + '</a>';
     task_title.innerHTML = task_title.innerHTML + link_pattern;
 
